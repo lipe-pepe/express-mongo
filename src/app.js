@@ -3,6 +3,9 @@ import express from "express";
 import conectaNoDb from "./config/dbConnect.js";
 import routes from "./routes/index.js";
 
+import manipuladorDeErros from "./middlewares/manipuladorDeErros.js";
+import manipulador404 from "./middlewares/manipulador404.js";
+
 // Cria a conexão com o banco de dados
 const conexao = await conectaNoDb();
 
@@ -24,5 +27,13 @@ conexao.once("open", () => {
 
 const app = express();
 routes(app); // inicia as rotas
+
+// Middleware para o 404
+app.use(manipulador404);
+
+// Criamos um middleware de tratamento de erros. Tratamos o código aqui para não precisar ficar
+// repetindo nas controllers.
+
+app.use(manipuladorDeErros);
 
 export default app;
