@@ -1,15 +1,14 @@
 import NaoEncontrado from "../errors/NaoEncontrado.js";
 import { autor } from "../models/Autor.js";
-import livro from "../models/Livro.js";
+import { livro } from "../models/index.js";
 
 class LivroController {
   // Usamos o static para não precisar instanciar a classe
   static async listarLivros(req, res, next) {
     try {
-      // Chamamos o modelo no MongoDB usando o mongoose. O .find é um método do mongoose
-      const listaLivros = await livro.find({});
-      // Usamos o .json para enviar dados estruturados
-      res.status(200).json(listaLivros);
+      const buscaLivros = livro.find();
+      req.resultado = buscaLivros;
+      next(); // Executa o proximo middleware registrado na rota
     } catch (erro) {
       next(erro);
     }
@@ -69,17 +68,37 @@ class LivroController {
     }
   }
 
-  static async buscarPorEditora(req, res, next) {
-    // Pega o query param "editora"
-    const editora = req.query.editora;
+  static async buscarPorFiltro(req, res, next) {
     try {
-      // Busca o livro pela propriedade editora usando o valor passado na query param
-      const resultado = await livro.find({ editora: editora });
-      res.status(200).json(resultado);
+      const busca = await processaBusca(req.query);
+      if (busca !== null) {
+        const livrosResultado = livro.find(busca);
+        req.resultado = livrosResultado;
+        next();
+      } else {
+        res.status(200).json([]);
+      }
     } catch (erro) {
       next(erro);
     }
   }
+}
+
+async function processaBusca(parametros) {
+  // Pega o query param "editora"
+  const { titulo, editora, minPaginas, maxPaginas } = parametros;
+
+  let busca = {};
+  if (editora) busca.editora = editora;
+  if (titulo) busca.titulo = { $regex: titulo, $options: "i" };
+
+  if (minPaginas || maxPaginas) busca.paginas = {};
+
+  // gte -> greater than or equal / lte -> less than or equal
+  if (minPaginas) busca.paginas.$gte = minPaginas;
+  if (maxPaginas) busca.paginas.$lte = maxPaginas;
+
+  return busca;
 }
 
 export default LivroController;

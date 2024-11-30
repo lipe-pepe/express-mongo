@@ -1,5 +1,5 @@
 import NaoEncontrado from "../errors/NaoEncontrado.js";
-import { autor } from "../models/Autor.js";
+import { autor } from "../models/index.js";
 
 class AutorController {
   // Usamos o static para não precisar instanciar a classe

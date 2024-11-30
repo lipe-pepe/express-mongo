@@ -1,5 +1,6 @@
 import express from "express";
 import LivroController from "../controllers/livroController.js";
+import paginar from "../middlewares/paginar.js";
 
 const routes = express.Router();
 
@@ -8,8 +9,8 @@ const routes = express.Router();
 // * rotas da maior para a menor complexidade.
 
 // Cria uma rota de get para livros
-routes.get("/livros", LivroController.listarLivros);
-routes.get("/livros/busca", LivroController.buscarPorEditora);
+routes.get("/livros", LivroController.listarLivros, paginar); // Importa o middleware de paginar
+routes.get("/livros/busca", LivroController.buscarPorFiltro, paginar);
 routes.get("/livros/:id", LivroController.listarLivro);
 routes.post("/livros", LivroController.cadastrarLivro);
 routes.put("/livros/:id", LivroController.atualizarLivro);
